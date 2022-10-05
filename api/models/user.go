@@ -72,9 +72,10 @@ func (u *User) validate(action string) error {
 			return errors.New("Invalid Email")
 		}
 	}
+	return nil
 }
 
-func (u *User) saveUser(db *gorm.DB) (*User, error) {
+func (u *User) createUser(db *gorm.DB) (*User, error) {
 
 	var err error
 	err = db.Debug().Create(&u).Error
@@ -106,10 +107,10 @@ func (u *User) findUserByID(db *gorm.DB, uid uint32) (*User, error) {
 	return u, err
 }
 
-func (u *User) updateAUser(db *gorm.DB, uid uint32) (*User, error) {
+func (u *User) updateUser(db *gorm.DB, uid uint32) (*User, error) {
 
 	// To hash the password
-	err := u.BeforeSave()
+	err := u.beforeSave()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,7 +133,7 @@ func (u *User) updateAUser(db *gorm.DB, uid uint32) (*User, error) {
 	return u, nil
 }
 
-func (u *User) deleteAUser(db *gorm.DB, uid uint32) (int64, error) {
+func (u *User) deleteUser(db *gorm.DB, uid uint32) (int64, error) {
 
 	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).Delete(&User{})
 
