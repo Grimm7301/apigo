@@ -79,11 +79,11 @@ func (u *UserHistory) updateUserHistory(db *gorm.DB) (*UserHistory, error) {
 
 	var err error
 
-	err = db.Debug().Model(&UserHistory{}).Where("id = ?", p.ID).Updates(UserHistory{Title: p.Title, Content: p.Content, UpdatedAt: time.Now()}).Error
+	err = db.Debug().Model(&UserHistory{}).Where("id = ?", u.ID).Updates(UserHistory{Method: u.Method, Query: u.Query, QueryStatus: u.QueryStatus}).Error
 	if err != nil {
 		return &UserHistory{}, err
 	}
-	return p, nil
+	return u, nil
 }
 
 func (u *UserHistory) deleteUserHistory(db *gorm.DB, uhid uint64) (int64, error) {
