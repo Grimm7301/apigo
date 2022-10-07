@@ -10,13 +10,13 @@ import (
 )
 
 type UserHistory struct {
-	ID          uint64    `gorm:"primary_key;auto_increment" json:"id"`
-	Method      string    `gorm:"size:7;not null;unique" json:"title"`
-	Query       string    `gorm:"size:255;not null;" json:"content"`
-	QueryStatus string    `gorm:"size:255;not null;" json:"content"`
-	Author      User      `json:"author"`
-	Browser     string    `gorm:"size:255;" json:"content"`
-	Time        time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	ID            uint64    `gorm:"primary_key;auto_increment" json:"id"`
+	Method        string    `gorm:"size:7;not null;unique" json:"method"`
+	Query         string    `gorm:"size:255;not null;" json:"query"`
+	QueryStatus   string    `gorm:"size:255;not null;" json:"querystatus"`
+	Author        User      `json:"author"`
+	Browser       string    `gorm:"size:255;" json:"browser"`
+	ExecutionTime time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"exectiontime"`
 }
 
 func (u *UserHistory) prepare() {
@@ -26,10 +26,10 @@ func (u *UserHistory) prepare() {
 	u.QueryStatus = html.EscapeString(strings.TrimSpace(u.QueryStatus))
 	u.Author = User{}
 	u.Browser = html.EscapeString(strings.TrimSpace(u.Browser))
-	u.Time = time.Now()
+	u.ExecutionTime = time.Now()
 }
 
-func (u *UserHistory) validate() error {
+func (u *UserHistory) Validate() error {
 
 	if u.Method == "" {
 		return errors.New("Required Method")
