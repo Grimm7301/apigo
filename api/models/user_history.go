@@ -15,11 +15,12 @@ type UserHistory struct {
 	Query         string    `gorm:"size:255;not null;" json:"query"`
 	QueryStatus   string    `gorm:"size:255;not null;" json:"querystatus"`
 	Author        User      `json:"author"`
+	AuthorID      uint32    `gorm:"not null" json:"author_id"`
 	Browser       string    `gorm:"size:255;" json:"browser"`
 	ExecutionTime time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"exectiontime"`
 }
 
-func (u *UserHistory) prepare() {
+func (u *UserHistory) Prepare() {
 	u.ID = 0
 	u.Method = html.EscapeString(strings.TrimSpace(u.Method))
 	u.Query = html.EscapeString(strings.TrimSpace(u.Query))
@@ -40,6 +41,9 @@ func (u *UserHistory) Validate() error {
 	if u.QueryStatus == "" {
 		return errors.New("Required QueryStatus")
 	}
+	if u.AuthorID < 1 {
+		return errors.New("Required Author")
+	}
 	return nil
 }
 
@@ -48,6 +52,12 @@ func (u *UserHistory) CreateUserHistory(db *gorm.DB) (*UserHistory, error) {
 	err = db.Debug().Model(&UserHistory{}).Create(&u).Error
 	if err != nil {
 		return &UserHistory{}, err
+	}
+	if u.ID != 0 {
+		err = db.Debug().Model(&User{}).Where("id = ?", u.AuthorID).Take(&u.Author).Error
+		if err != nil {
+			return &UserHistory{}, err
+		}
 	}
 	return u, nil
 }
@@ -59,6 +69,14 @@ func (u *UserHistory) FindAllUserHistory(db *gorm.DB) (*[]UserHistory, error) {
 	if err != nil {
 		return &[]UserHistory{}, err
 	}
+	if len(histories) > 0 {
+		for i, _ := range histories {
+			err := db.Debug().Model(&User{}).Where("id = ?", histories[i].AuthorID).Take(&histories[i].Author).Error
+			if err != nil {
+				return &[]UserHistory{}, err
+			}
+		}
+	}
 	return &histories, nil
 }
 
@@ -68,33 +86,11 @@ func (u *UserHistory) FindUserHistoryById(db *gorm.DB, uhid uint64) (*UserHistor
 	if err != nil {
 		return &UserHistory{}, err
 	}
-	return u, nil
-}
-
-func (u *UserHistory) FindUserHistoryByUserId(db *gorm.DB, uhid uint64) (*UserHistory, error) {
-	return u, nil
-}
-
-func (u *UserHistory) UpdateUserHistory(db *gorm.DB) (*UserHistory, error) {
-
-	var err error
-
-	err = db.Debug().Model(&UserHistory{}).Where("id = ?", u.ID).Updates(UserHistory{Method: u.Method, Query: u.Query, QueryStatus: u.QueryStatus}).Error
-	if err != nil {
-		return &UserHistory{}, err
-	}
-	return u, nil
-}
-
-func (u *UserHistory) DeleteUserHistory(db *gorm.DB, uhid uint64) (int64, error) {
-
-	db = db.Debug().Model(&UserHistory{}).Where("id = ?", uhid).Take(&UserHistory{}).Delete(&UserHistory{})
-
-	if db.Error != nil {
-		if gorm.IsRecordNotFoundError(db.Error) {
-			return 0, errors.New("User History not found")
+	if u.ID != 0 {
+		err = db.Debug().Model(&User{}).Where("id = ?", u.AuthorID).Take(&u.Author).Error
+		if err != nil {
+			return &UserHistory{}, err
 		}
-		return 0, db.Error
 	}
-	return db.RowsAffected, nil
+	return u, nil
 }
