@@ -13,7 +13,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func createToken(user_id uint32) (string, error) {
+func CreateToken(user_id uint32) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = user_id
@@ -23,8 +23,8 @@ func createToken(user_id uint32) (string, error) {
 
 }
 
-func tokenValid(r *http.Request) error {
-	tokenString := extractToken(r)
+func TokenValid(r *http.Request) error {
+	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -35,12 +35,12 @@ func tokenValid(r *http.Request) error {
 		return err
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		pretty(claims)
+		Pretty(claims)
 	}
 	return nil
 }
 
-func extractToken(r *http.Request) string {
+func ExtractToken(r *http.Request) string {
 	keys := r.URL.Query()
 	token := keys.Get("token")
 	if token != "" {
@@ -53,9 +53,9 @@ func extractToken(r *http.Request) string {
 	return ""
 }
 
-func extractTokenID(r *http.Request) (uint32, error) {
+func ExtractTokenID(r *http.Request) (uint32, error) {
 
-	tokenString := extractToken(r)
+	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -77,7 +77,7 @@ func extractTokenID(r *http.Request) (uint32, error) {
 }
 
 // Pretty display the claims licely in the terminal
-func pretty(data interface{}) {
+func Pretty(data interface{}) {
 	b, err := json.MarshalIndent(data, "", " ")
 	if err != nil {
 		log.Println(err)

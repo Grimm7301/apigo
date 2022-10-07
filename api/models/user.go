@@ -29,7 +29,7 @@ func verifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (u *User) beforeSave() error {
+func (u *User) BeforeSave() error {
 	hashedPassword, err := hash(u.Password)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (u *User) beforeSave() error {
 	return nil
 }
 
-func (u *User) prepare() {
+func (u *User) Prepare() {
 	u.ID = 0
 	u.Nickname = html.EscapeString(strings.TrimSpace(u.Nickname))
 	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
@@ -46,7 +46,7 @@ func (u *User) prepare() {
 	u.UpdatedAt = time.Now()
 }
 
-func (u *User) validate(action string) error {
+func (u *User) Validate(action string) error {
 	if strings.ToLower(action) == "login" {
 		if u.Password == "" {
 			return errors.New("Required Password")
@@ -75,7 +75,7 @@ func (u *User) validate(action string) error {
 	return nil
 }
 
-func (u *User) createUser(db *gorm.DB) (*User, error) {
+func (u *User) CreateUser(db *gorm.DB) (*User, error) {
 
 	var err error
 	err = db.Debug().Create(&u).Error
@@ -85,7 +85,7 @@ func (u *User) createUser(db *gorm.DB) (*User, error) {
 	return u, nil
 }
 
-func (u *User) findAllUsers(db *gorm.DB) (*[]User, error) {
+func (u *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
 	var err error
 	users := []User{}
 	err = db.Debug().Model(&User{}).Limit(100).Find(&users).Error
@@ -95,7 +95,7 @@ func (u *User) findAllUsers(db *gorm.DB) (*[]User, error) {
 	return &users, err
 }
 
-func (u *User) findUserByID(db *gorm.DB, uid uint32) (*User, error) {
+func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
 	var err error
 	err = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
@@ -107,10 +107,10 @@ func (u *User) findUserByID(db *gorm.DB, uid uint32) (*User, error) {
 	return u, err
 }
 
-func (u *User) updateUser(db *gorm.DB, uid uint32) (*User, error) {
+func (u *User) UpdateUser(db *gorm.DB, uid uint32) (*User, error) {
 
 	// To hash the password
-	err := u.beforeSave()
+	err := u.BeforeSave()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func (u *User) updateUser(db *gorm.DB, uid uint32) (*User, error) {
 	return u, nil
 }
 
-func (u *User) deleteUser(db *gorm.DB, uid uint32) (int64, error) {
+func (u *User) DeleteUser(db *gorm.DB, uid uint32) (int64, error) {
 
 	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).Delete(&User{})
 

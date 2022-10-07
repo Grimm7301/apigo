@@ -43,7 +43,7 @@ func (u *UserHistory) validate() error {
 	return nil
 }
 
-func (u *UserHistory) createUserHistory(db *gorm.DB) (*UserHistory, error) {
+func (u *UserHistory) CreateUserHistory(db *gorm.DB) (*UserHistory, error) {
 	var err error
 	err = db.Debug().Model(&UserHistory{}).Create(&u).Error
 	if err != nil {
@@ -52,7 +52,7 @@ func (u *UserHistory) createUserHistory(db *gorm.DB) (*UserHistory, error) {
 	return u, nil
 }
 
-func (u *UserHistory) findAllUserHistory(db *gorm.DB) (*[]UserHistory, error) {
+func (u *UserHistory) FindAllUserHistory(db *gorm.DB) (*[]UserHistory, error) {
 	var err error
 	histories := []UserHistory{}
 	err = db.Debug().Model(&UserHistory{}).Limit(100).Find(&histories).Error
@@ -62,7 +62,7 @@ func (u *UserHistory) findAllUserHistory(db *gorm.DB) (*[]UserHistory, error) {
 	return &histories, nil
 }
 
-func (u *UserHistory) findUserHistoryById(db *gorm.DB, uhid uint64) (*UserHistory, error) {
+func (u *UserHistory) FindUserHistoryById(db *gorm.DB, uhid uint64) (*UserHistory, error) {
 	var err error
 	err = db.Debug().Model(&UserHistory{}).Where("id = ?", uhid).Take(&u).Error
 	if err != nil {
@@ -71,11 +71,11 @@ func (u *UserHistory) findUserHistoryById(db *gorm.DB, uhid uint64) (*UserHistor
 	return u, nil
 }
 
-func (u *UserHistory) findUserHistoryByUserId(db *gorm.DB, uhid uint64) (*UserHistory, error) {
-
+func (u *UserHistory) FindUserHistoryByUserId(db *gorm.DB, uhid uint64) (*UserHistory, error) {
+	return u, nil
 }
 
-func (u *UserHistory) updateUserHistory(db *gorm.DB) (*UserHistory, error) {
+func (u *UserHistory) UpdateUserHistory(db *gorm.DB) (*UserHistory, error) {
 
 	var err error
 
@@ -86,7 +86,7 @@ func (u *UserHistory) updateUserHistory(db *gorm.DB) (*UserHistory, error) {
 	return u, nil
 }
 
-func (u *UserHistory) deleteUserHistory(db *gorm.DB, uhid uint64) (int64, error) {
+func (u *UserHistory) DeleteUserHistory(db *gorm.DB, uhid uint64) (int64, error) {
 
 	db = db.Debug().Model(&UserHistory{}).Where("id = ?", uhid).Take(&UserHistory{}).Delete(&UserHistory{})
 
